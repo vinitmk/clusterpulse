@@ -32,7 +32,34 @@ Spring Boot foundation with a node metric simulator and REST API.
 
 ---
 
-## Running Locally
+### ✅ Iteration 2 — Persistence + Containerization
+TimescaleDB persistence and full Docker Compose stack.
+
+**What was built:**
+- `Node` and `NodeMetrics` — converted to JPA entities with proper relationships and auditing
+- `NodeRepository` and `NodeMetricsRepository` — Spring Data JPA repositories with time-series query methods
+- `DataInitializer` — seeds 5 nodes on startup, idempotent (skips if already exists)
+- `Dockerfile` — multi-stage build for minimal production image
+- `docker-compose.yml` — runs the full stack (backend + TimescaleDB) with a single command
+
+**Key decisions:**
+- TimescaleDB (PostgreSQL extension) chosen for native time-series performance
+- Hibernate `ddl-auto=update` used for schema management in dev
+- Docker volume ensures metric data persists across container restarts
+- Port 5433 used for TimescaleDB external access to avoid conflict with local PostgreSQL
+
+**Running with Docker:**
+```bash
+git clone https://github.com/vinitmk/clusterpulse.git
+cd clusterpulse
+docker compose up --build
+```
+
+Metrics persist to TimescaleDB and survive container restarts. Verified 1,600+ rows flowing after a single session.
+
+---
+
+## Running Locally (Iteration 1 only, no Docker)
 
 **Prerequisites:** Java 17+, Maven
 ```bash
@@ -43,4 +70,17 @@ cd clusterpulse/backend
 
 ---
 
-*More iterations coming — persistence, React dashboard, AI narration, and Kubernetes.*
+## Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| Backend | Java 17, Spring Boot 4, Spring Web, Spring Scheduling |
+| Persistence | TimescaleDB, Spring Data JPA, Hibernate |
+| Containerization | Docker, Docker Compose |
+| Frontend | React (coming Iteration 3) |
+| AI Integration | Claude API (coming Iteration 3) |
+| Orchestration | Kubernetes (coming Iteration 4) |
+
+---
+
+*More iterations coming — React dashboard, AI narration, and Kubernetes.*
