@@ -44,7 +44,7 @@ public class MetricsController {
      */
     @GetMapping("/metrics/{nodeId}")
     public ResponseEntity<NodeMetrics> getLatestMetricsForNode(@PathVariable String nodeId) {
-        Optional<Node> nodeOpt = NODES.stream().filter(n -> n.nodeId().equals(nodeId)).findFirst();
+        Optional<Node> nodeOpt = NODES.stream().filter(n -> n.getNodeId().equals(nodeId)).findFirst();
         if (nodeOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
@@ -62,7 +62,7 @@ public class MetricsController {
      */
     @GetMapping("/metrics/{nodeId}/history")
     public ResponseEntity<List<NodeMetrics>> getMetricsWindowForNode(@PathVariable String nodeId) {
-        Optional<Node> nodeOpt = NODES.stream().filter(n -> n.nodeId().equals(nodeId)).findFirst();
+        Optional<Node> nodeOpt = NODES.stream().filter(n -> n.getNodeId().equals(nodeId)).findFirst();
         if (nodeOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
@@ -83,11 +83,11 @@ public class MetricsController {
         Map<String, NodeMetrics> latestMetrics = metricsService.getAllLatestMetrics();
         return NODES.stream().map(node -> {
             Map<String, Object> nodeInfo = new HashMap<>();
-            nodeInfo.put("nodeId", node.nodeId());
-            nodeInfo.put("nodeName", node.nodeName());
-            nodeInfo.put("region", node.region());
-            nodeInfo.put("status", node.status().name());
-            NodeMetrics metrics = latestMetrics.get(node.nodeId());
+            nodeInfo.put("nodeId", node.getNodeId());
+            nodeInfo.put("nodeName", node.getNodeName());
+            nodeInfo.put("region", node.getRegion());
+            nodeInfo.put("status", node.getStatus().name());
+            NodeMetrics metrics = latestMetrics.get(node.getNodeId());
             nodeInfo.put("latestMetric", metrics);
             return nodeInfo;
         }).collect(Collectors.toList());

@@ -1,0 +1,45 @@
+version: "3.9"
+
+services:
+  timescaledb:
+    image: timescale/timescaledb:latest-pg15
+    container_name: timescaledb
+    environment:
+      POSTGRES_DB: clusterpulse
+      POSTGRES_USER: clusterpulse
+      POSTGRES_PASSWORD: clusterpulse
+    ports:
+      - "5432:5432"
+    volumes:
+      - timescaledb_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U clusterpulse -d clusterpulse"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - clusterpulse-net
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://timescaledb:5432/clusterpulse
+      SPRING_DATASOURCE_USERNAME: clusterpulse
+      SPRING_DATASOURCE_PASSWORD: clusterpulse
+    ports:
+      - "8080:8080"
+    depends_on:
+      timescaledb:
+        condition: service_healthy
+    networks:
+      - clusterpulse-net
+
+volumes:
+  timescaledb_data:
+
+networks:
+  clusterpulse-net:
+    driver: bridge

@@ -2,10 +2,11 @@ package com.clusterpulse.backend;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-// Enables Spring's scheduled task execution support so @Scheduled methods run automatically.
 @EnableScheduling
+@EnableJpaAuditing
 @SpringBootApplication
 public class BackendApplication {
 
