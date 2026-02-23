@@ -1,4 +1,5 @@
 package com.clusterpulse.backend.config;
+
 import com.clusterpulse.backend.model.Node;
 import com.clusterpulse.backend.repository.NodeRepository;
 import org.slf4j.Logger;
@@ -7,15 +8,12 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
 import java.util.List;
-import java.util.UUID;
 
 @Component
 public class DataInitializer implements ApplicationRunner {
 
     private static final Logger logger = LoggerFactory.getLogger(DataInitializer.class);
-
     private final NodeRepository nodeRepository;
 
     public DataInitializer(NodeRepository nodeRepository) {
@@ -24,55 +22,22 @@ public class DataInitializer implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
-        long nodeCount = nodeRepository.count();
-        if (nodeCount > 0) {
-            logger.info("Nodes already exist in the database. Skipping seeding.");
-            return;
-        }
-
-        List<Node> nodes = List.of(
-                Node.builder()
-                        .id(UUID.randomUUID())
-                        .nodeId("node-1")
-                        .nodeName("Alpha Node")
-                        .region("us-east-1")
-                        .status(Node.Status.HEALTHY)
-                        .createdDate(Instant.now())
-                        .build(),
-                Node.builder()
-                        .id(UUID.randomUUID())
-                        .nodeId("node-2")
-                        .nodeName("Beta Node")
-                        .region("us-east-1")
-                        .status(Node.Status.HEALTHY)
-                        .createdDate(Instant.now())
-                        .build(),
-                Node.builder()
-                        .id(UUID.randomUUID())
-                        .nodeId("node-3")
-                        .nodeName("Gamma Node")
-                        .region("us-east-1")
-                        .status(Node.Status.HEALTHY)
-                        .createdDate(Instant.now())
-                        .build(),
-                Node.builder()
-                        .id(UUID.randomUUID())
-                        .nodeId("node-4")
-                        .nodeName("Delta Node")
-                        .region("us-east-1")
-                        .status(Node.Status.HEALTHY)
-                        .createdDate(Instant.now())
-                        .build(),
-                Node.builder()
-                        .id(UUID.randomUUID())
-                        .nodeId("node-5")
-                        .nodeName("Epsilon Node")
-                        .region("us-east-1")
-                        .status(Node.Status.HEALTHY)
-                        .createdDate(Instant.now())
-                        .build()
+        List<String[]> nodeData = List.of(
+            new String[]{"node-1", "Alpha Node"},
+            new String[]{"node-2", "Beta Node"},
+            new String[]{"node-3", "Gamma Node"},
+            new String[]{"node-4", "Delta Node"},
+            new String[]{"node-5", "Epsilon Node"}
         );
-        nodeRepository.saveAll(nodes);
-        logger.info("Seeded 5 initial nodes to the database: {}", nodes.stream().map(Node::getNodeId).toList());
+
+        for (String[] data : nodeData) {
+            if (nodeRepository.findByNodeId(data[0]).isEmpty()) {
+                nodeRepository.save(Node.create(data[0], data[1]));
+                logger.info("Seeded node: {}", data[0]);
+            } else {
+                logger.info("Node already exists, skipping: {}", data[0]);
+            }
+        }
+        logger.info("Data initialization complete.");
     }
 }
