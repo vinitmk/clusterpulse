@@ -2,8 +2,10 @@ package com.clusterpulse.backend.controller;
 
 import com.clusterpulse.backend.model.Node;
 import com.clusterpulse.backend.model.NodeMetrics;
+import com.clusterpulse.backend.service.AiAnalysisService;
 import com.clusterpulse.backend.service.MetricsService;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,6 +17,7 @@ import java.util.stream.Collectors;
 public class MetricsController {
 
     private final MetricsService metricsService;
+    private final AiAnalysisService aiAnalysisService;
 
     // For demo: list of available node IDs and their display names
     private static final List<Node> NODES = List.of(
@@ -25,8 +28,9 @@ public class MetricsController {
             Node.create("node-5", "Node 5")
     );
 
-    public MetricsController(MetricsService metricsService) {
+    public MetricsController(MetricsService metricsService, AiAnalysisService aiAnalysisService) {
         this.metricsService = metricsService;
+        this.aiAnalysisService = aiAnalysisService;
     }
 
     /**
@@ -91,6 +95,19 @@ public class MetricsController {
             nodeInfo.put("latestMetric", metrics);
             return nodeInfo;
         }).collect(Collectors.toList());
+    }
+
+    /**
+     * POST /api/ai/analyze
+     * Gets latest metrics for all nodes, sends them to Claude, and returns a 3–4 sentence SRE health summary as plain text.
+     */
+    @PostMapping(value = "/ai/analyze", produces = MediaType.TEXT_PLAIN_VALUE)
+    public ResponseEntity<String> analyzeCluster() {
+        try {
+            return ResponseEntity.ok(aiAnalysisService.analyze());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Analysis failed: " + e.getMessage());
+        }
     }
 }
 

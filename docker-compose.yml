@@ -27,6 +27,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://timescaledb:5432/clusterpulse
       SPRING_DATASOURCE_USERNAME: clusterpulse
       SPRING_DATASOURCE_PASSWORD: clusterpulse
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
     ports:
       - "8080:8080"
     depends_on:
