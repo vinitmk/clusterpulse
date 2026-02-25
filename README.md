@@ -59,14 +59,40 @@ Metrics persist to TimescaleDB and survive container restarts. Verified 1,600+ r
 
 ---
 
-## Running Locally (Iteration 1 only, no Docker)
+### ✅ Iteration 3 — React Dashboard + AI Narrator
+Live frontend dashboard with AI-powered cluster health analysis.
 
-**Prerequisites:** Java 17+, Maven
+**What was built:**
+- `NodeGrid` — health cards for each node with color-coded borders (green/yellow/red) based on CPU and latency thresholds, updating every 3 seconds
+- `MetricsChart` — live Recharts line chart showing CPU% and latency per node with a dropdown to switch nodes, refreshing every 5 seconds
+- `AiNarrator` — streams cluster health analysis from Claude API, displayed in a terminal-style panel
+- `AiAnalysisService` — Spring service that collects latest metrics, builds an SRE-style prompt, and calls the Anthropic Claude API
+- `POST /api/ai/analyze` — new backend endpoint returning plain-English cluster health summary
+
+**Key decisions:**
+- Claude Haiku (`claude-haiku-4-5-20251001`) chosen for speed and cost efficiency
+- Model, API URL, and API key all configurable via environment variables — no hardcoded values
+- CORS configured properly for production-readiness, not just Vite proxy workaround
+- Vite dev server with proxy configured for local development
+
+**Running the full stack:**
 ```bash
-git clone https://github.com/vinitmk/clusterpulse.git
-cd clusterpulse/backend
-./mvnw spring-boot:run
+# Terminal 1 — backend + database
+docker compose up --build
+
+# Terminal 2 — frontend
+cd frontend
+npm run dev
 ```
+
+Open `http://localhost:5173` to see the live dashboard.
+
+**Environment variables required:**
+| Variable | Description |
+|----------|-------------|
+| `ANTHROPIC_API_KEY` | Your Anthropic API key from console.anthropic.com |
+| `ANTHROPIC_MODEL` | Model to use (default: `claude-haiku-4-5-20251001`) |
+| `ANTHROPIC_API_URL` | API endpoint (default: `https://api.anthropic.com/v1/messages`) |
 
 ---
 
@@ -77,10 +103,32 @@ cd clusterpulse/backend
 | Backend | Java 17, Spring Boot 4, Spring Web, Spring Scheduling |
 | Persistence | TimescaleDB, Spring Data JPA, Hibernate |
 | Containerization | Docker, Docker Compose |
-| Frontend | React (coming Iteration 3) |
-| AI Integration | Claude API (coming Iteration 3) |
+| Frontend | React, Recharts, Vite, Axios |
+| AI Integration | Claude Haiku via Anthropic API |
 | Orchestration | Kubernetes (coming Iteration 4) |
 
 ---
 
-*More iterations coming — React dashboard, AI narration, and Kubernetes.*
+## Project Structure
+```
+clusterpulse/
+├── backend/
+│   └── src/main/java/com/clusterpulse/backend/
+│       ├── config/         (WebConfig, DataInitializer)
+│       ├── controller/     (MetricsController)
+│       ├── model/          (Node, NodeMetrics)
+│       ├── repository/     (NodeRepository, NodeMetricsRepository)
+│       ├── service/        (MetricsService, AiAnalysisService)
+│       └── simulator/      (NodeMetricSimulator)
+├── frontend/
+│   └── src/
+│       ├── components/     (NodeGrid, MetricsChart, AiNarrator)
+│       ├── hooks/          (useMetrics)
+│       └── App.jsx
+├── docker-compose.yml
+└── README.md
+```
+
+---
+
+*Coming next — Iteration 4: Testing, Kubernetes deployment, and CI/CD pipeline.*
