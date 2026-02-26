@@ -96,6 +96,56 @@ Open `http://localhost:5173` to see the live dashboard.
 
 ---
 
+### ✅ Iteration 4 — Testing + Kubernetes + CI/CD
+Production-grade testing, container orchestration, and automated pipeline.
+
+**What was built:**
+- `MetricsServiceTest` — 8 unit tests covering all service methods using JUnit 5 and Mockito
+- `k8s/deployment.yaml` — Kubernetes Deployment with 2 replicas and self-healing
+- `k8s/service.yaml` — Kubernetes Service exposing the backend via NodePort
+- `k8s/configmap.yaml` — Non-secret config (database URL, model name) managed by Kubernetes
+- `k8s/secret.yaml` — Encrypted storage for the Anthropic API key
+- `.github/workflows/ci.yml` — GitHub Actions pipeline that runs tests and builds Docker image on every push
+
+**Key decisions:**
+- `k8s/secret.yaml` added to `.gitignore` — API keys never committed to git
+- `imagePullPolicy: Never` in deployment — uses locally built image inside minikube
+- `BackendApplicationTests` decoupled from database — unit tests run without Docker
+- Surefire plugin configured with `-XX:+EnableDynamicAgentLoading` to suppress Mockito warnings
+
+**Running on Kubernetes (local):**
+```bash
+# Start minikube
+minikube start
+eval $(minikube docker-env)
+
+# Build image into minikube
+docker build -t clusterpulse-backend:latest ./backend
+
+# Deploy
+kubectl apply -f k8s/secret.yaml
+kubectl apply -f k8s/configmap.yaml
+kubectl apply -f k8s/deployment.yaml
+kubectl apply -f k8s/service.yaml
+
+# Access
+minikube service clusterpulse-backend --url
+```
+
+**Self-healing demo:**
+```bash
+# Delete a pod — Kubernetes immediately replaces it
+kubectl delete pod <pod-name>
+kubectl get pods
+```
+
+**CI/CD pipeline triggers on every push to main:**
+- Runs all unit tests
+- Fails build if any test fails
+- Builds Docker image
+
+---
+
 ## Tech Stack
 
 | Layer | Technology |
@@ -105,7 +155,8 @@ Open `http://localhost:5173` to see the live dashboard.
 | Containerization | Docker, Docker Compose |
 | Frontend | React, Recharts, Vite, Axios |
 | AI Integration | Claude Haiku via Anthropic API |
-| Orchestration | Kubernetes (coming Iteration 4) |
+| Orchestration | Kubernetes (minikube), kubectl |
+| CI/CD | GitHub Actions |
 
 ---
 
@@ -113,22 +164,32 @@ Open `http://localhost:5173` to see the live dashboard.
 ```
 clusterpulse/
 ├── backend/
-│   └── src/main/java/com/clusterpulse/backend/
-│       ├── config/         (WebConfig, DataInitializer)
-│       ├── controller/     (MetricsController)
-│       ├── model/          (Node, NodeMetrics)
-│       ├── repository/     (NodeRepository, NodeMetricsRepository)
-│       ├── service/        (MetricsService, AiAnalysisService)
-│       └── simulator/      (NodeMetricSimulator)
+│   ├── src/main/java/com/clusterpulse/backend/
+│   │   ├── config/         (WebConfig, DataInitializer)
+│   │   ├── controller/     (MetricsController)
+│   │   ├── model/          (Node, NodeMetrics)
+│   │   ├── repository/     (NodeRepository, NodeMetricsRepository)
+│   │   ├── service/        (MetricsService, AiAnalysisService)
+│   │   └── simulator/      (NodeMetricSimulator)
+│   └── src/test/java/com/clusterpulse/backend/
+│       └── service/        (MetricsServiceTest)
 ├── frontend/
 │   └── src/
 │       ├── components/     (NodeGrid, MetricsChart, AiNarrator)
 │       ├── hooks/          (useMetrics)
 │       └── App.jsx
+├── k8s/
+│   ├── configmap.yaml
+│   ├── deployment.yaml
+│   ├── secret.yaml         (gitignored - contains API key)
+│   └── service.yaml
+├── .github/
+│   └── workflows/
+│       └── ci.yml
 ├── docker-compose.yml
 └── README.md
 ```
 
 ---
 
-*Coming next — Iteration 4: Testing, Kubernetes deployment, and CI/CD pipeline.*
+*Coming next — Iteration 5: Alerting, Grafana dashboards, and cloud deployment.*
