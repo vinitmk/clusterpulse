@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: clusterpulse-backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: clusterpulse-backend
+  template:
+    metadata:
+      labels:
+        app: clusterpulse-backend
+    spec:
+      containers:
+        - name: backend
+          image: clusterpulse-backend:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: clusterpulse-config
+            - secretRef:
+                name: clusterpulse-secret

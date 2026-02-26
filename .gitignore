@@ -31,3 +31,4 @@ frontend/.env.production.local
 !**/src/main/**/target/
 !**/src/test/**/target/
 .env
+k8s/secret.yaml
