@@ -106,7 +106,7 @@ class MetricsServiceTest {
     @Test
     void addMetrics_multipleNodes_storesIndependently() {
         NodeMetrics nodeMetric1 = NodeMetrics.of("node-1", 50.0, 40.0, 30.0);
-        NodeMetrics nodeMetric2 = NodeMetrics.of("node-2", 70.0, 60.0, 50.0);
+        NodeMetrics nodeMetric2 = NodeMetrics.of("node-2", 80.0, 60.0, 50.0);
 
         metricsService.addMetrics(nodeMetric1);
         metricsService.addMetrics(nodeMetric2);
