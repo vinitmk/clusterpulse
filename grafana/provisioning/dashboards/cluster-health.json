@@ -1,0 +1,93 @@
+{
+    "title": "ClusterPulse - Cluster Health",
+    "uid": "clusterpulse-health",
+    "timezone": "browser",
+    "refresh": "5s",
+    "panels": [
+      {
+        "id": 1,
+        "title": "CPU % per Node",
+        "type": "timeseries",
+        "gridPos": { "x": 0, "y": 0, "w": 24, "h": 8 },
+        "datasource": { "type": "postgres", "uid": "P40AE60E18F02DE32" },
+        "targets": [
+          {
+            "rawSql": "SELECT timestamp AS time, node_id, cpu_percent FROM node_metrics WHERE timestamp >= NOW() - INTERVAL '30 minutes' ORDER BY timestamp ASC",
+            "format": "time_series",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 70 },
+                { "color": "red", "value": 85 }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "Network Latency (ms) per Node",
+        "type": "timeseries",
+        "gridPos": { "x": 0, "y": 8, "w": 24, "h": 8 },
+        "datasource": { "type": "postgres", "uid": "TimescaleDB" },
+        "targets": [
+          {
+            "rawSql": "SELECT timestamp AS time, node_id, network_latency_ms FROM node_metrics WHERE timestamp >= NOW() - INTERVAL '30 minutes' ORDER BY timestamp ASC",
+            "format": "time_series",
+            "refId": "B"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ms",
+            "min": 0,
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 200 },
+                { "color": "red", "value": 300 }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 3,
+        "title": "Memory % per Node",
+        "type": "timeseries",
+        "gridPos": { "x": 0, "y": 16, "w": 24, "h": 8 },
+        "datasource": { "type": "postgres", "uid": "TimescaleDB" },
+        "targets": [
+          {
+            "rawSql": "SELECT timestamp AS time, node_id, memory_percent FROM node_metrics WHERE timestamp >= NOW() - INTERVAL '30 minutes' ORDER BY timestamp ASC",
+            "format": "time_series",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 70 },
+                { "color": "red", "value": 85 }
+              ]
+            }
+          }
+        }
+      }
+    ],
+    "schemaVersion": 38,
+    "version": 1
+  }
