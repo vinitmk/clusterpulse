@@ -146,6 +146,54 @@ kubectl get pods
 
 ---
 
+### ✅ Iteration 5 — Alerting + Grafana + WebSocket
+Production observability with real-time push, email alerting, and professional dashboards.
+
+**Phase A — Email Alerting:**
+- `AlertService` — evaluates metrics every 5 seconds, fires email alerts when thresholds breached
+- Per-node cooldown (configurable) prevents alert spam
+- Gmail SMTP integration via Spring JavaMailSender
+- Alerts fire on CPU > 85% or latency > 300ms
+
+**Phase B — Grafana Dashboards:**
+- Grafana added to `docker-compose.yml` as a container
+- Auto-provisioned datasource connecting directly to TimescaleDB
+- 3 dashboards auto-loaded on startup: CPU per node, latency per node, memory per node
+- 5-second auto-refresh, color-coded thresholds (green/yellow/red)
+- No backend API involved — Grafana queries TimescaleDB directly via SQL
+
+**Phase C — WebSocket Live Push:**
+- `WebSocketConfig` — configures STOMP message broker over native WebSocket
+- `MetricsBroadcaster` — pushes latest metrics to `/topic/metrics` every second
+- React `useMetrics` hook replaced polling with STOMP WebSocket subscription
+- Verified via Chrome DevTools Network → Socket tab showing status 101 (WebSocket upgrade)
+- Dashboard now shows live `● Live` / `● Disconnected` connection indicator
+
+**Key decisions:**
+- SockJS skipped in favor of native WebSocket (`brokerURL`) to avoid Vite compatibility issues
+- `global: 'globalThis'` polyfill added to `vite.config.js` for browser compatibility
+- Grafana datasource UID hardcoded in dashboard JSON to match provisioned datasource
+- Alert cooldown configurable via `application.properties` — set to 100 minutes during development
+
+**Running Grafana:**
+
+Open `http://localhost:3000` — login with `admin/admin`. Dashboard loads automatically under ClusterPulse folder.
+
+**Alert thresholds (configurable in `application.properties`):**
+| Property | Default | Description |
+|----------|---------|-------------|
+| `alert.cpu.threshold` | 85.0 | CPU % to trigger alert |
+| `alert.latency.threshold` | 300.0 | Latency ms to trigger alert |
+| `alert.cooldown.minutes` | 100 | Minutes between repeat alerts per node |
+
+**Environment variables added:**
+| Variable | Description |
+|----------|-------------|
+| `MAIL_USERNAME` | Gmail address for sending alerts |
+| `MAIL_PASSWORD` | Gmail App Password (16-character, not your regular password) |
+
+---
+
 ## Tech Stack
 
 | Layer | Technology |
@@ -153,10 +201,12 @@ kubectl get pods
 | Backend | Java 17, Spring Boot 4, Spring Web, Spring Scheduling |
 | Persistence | TimescaleDB, Spring Data JPA, Hibernate |
 | Containerization | Docker, Docker Compose |
-| Frontend | React, Recharts, Vite, Axios |
+| Frontend | React, Recharts, Vite, Axios, STOMP.js |
 | AI Integration | Claude Haiku via Anthropic API |
 | Orchestration | Kubernetes (minikube), kubectl |
 | CI/CD | GitHub Actions |
+| Observability | Grafana, JavaMailSender (Gmail SMTP) |
+| Real-time | WebSocket (STOMP), Spring Message Broker |
 
 ---
 
@@ -165,11 +215,11 @@ kubectl get pods
 clusterpulse/
 ├── backend/
 │   ├── src/main/java/com/clusterpulse/backend/
-│   │   ├── config/         (WebConfig, DataInitializer)
+│   │   ├── config/         (WebConfig, DataInitializer, WebSocketConfig)
 │   │   ├── controller/     (MetricsController)
 │   │   ├── model/          (Node, NodeMetrics)
 │   │   ├── repository/     (NodeRepository, NodeMetricsRepository)
-│   │   ├── service/        (MetricsService, AiAnalysisService)
+│   │   ├── service/        (MetricsService, AiAnalysisService, AlertService, MetricsBroadcaster)
 │   │   └── simulator/      (NodeMetricSimulator)
 │   └── src/test/java/com/clusterpulse/backend/
 │       └── service/        (MetricsServiceTest)
@@ -178,6 +228,10 @@ clusterpulse/
 │       ├── components/     (NodeGrid, MetricsChart, AiNarrator)
 │       ├── hooks/          (useMetrics)
 │       └── App.jsx
+├── grafana/
+│   └── provisioning/
+│       ├── datasources/    (timescaledb.yaml)
+│       └── dashboards/     (dashboards.yaml, cluster-health.json)
 ├── k8s/
 │   ├── configmap.yaml
 │   ├── deployment.yaml
@@ -192,4 +246,4 @@ clusterpulse/
 
 ---
 
-*Coming next — Iteration 5: Alerting, Grafana dashboards, and cloud deployment.*
+*Coming next — Iteration 5 Phase D: Cloud deployment.*
