@@ -61,7 +61,8 @@ const selectStyle = {
 };
 
 function App() {
-  const metrics = useMetrics();
+  // const metrics = useMetrics();
+  const { metrics, connected } = useMetrics();
   const nodeList = Array.isArray(metrics) ? metrics.map(node => node.nodeId) : [];
   const defaultNode = nodeList.length > 0 ? nodeList[0] : "node-1";
   const [selectedNode, setSelectedNode] = useState(defaultNode);
@@ -79,6 +80,15 @@ function App() {
       {/* Header */}
       <div style={headerStyle}>
         ClusterPulse
+        <span style={{
+  fontSize: '12px',
+  padding: '4px 10px',
+  borderRadius: '12px',
+  background: connected ? '#22c55e' : '#ef4444',
+  color: 'white'
+}}>
+  {connected ? '● Live' : '● Disconnected'}
+</span>
       </div>
 
       {/* NodeGrid Section */}
