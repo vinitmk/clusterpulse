@@ -4,11 +4,23 @@
 
 ---
 
-## Why This Project Exists
+## What This Is
 
-I'm a senior engineer learning how to effectively use AI coding assistants as a force multiplier. Rather than doing toy exercises, I'm building a real-world infrastructure tooling project incrementally, using Cursor IDE as my primary AI pair programmer.
+ClusterPulse is a full-stack infrastructure monitoring platform built to demonstrate production-grade software engineering across the entire stack — from database to cloud deployment.
 
-**End goal:** A full-stack infrastructure monitoring dashboard with AI-powered health narration, containerized and deployable to Kubernetes. Built one iteration at a time.
+It monitors a simulated 5-node cluster in real time, visualizes metrics via a React dashboard and Grafana, fires email alerts on anomalies, and uses Claude AI to narrate cluster health in plain English.
+
+**Built iteratively over 5 iterations, each adding a production concern:**
+
+| | What | Why It Matters |
+|-|------|----------------|
+| 1 | Spring Boot REST API + metric simulator | Backend foundation |
+| 2 | TimescaleDB + Docker Compose | Time-series persistence |
+| 3 | React dashboard + Claude AI narrator | Full stack + AI integration |
+| 4 | JUnit tests + Kubernetes + GitHub Actions CI/CD | Production engineering |
+| 5 | Email alerts + Grafana + WebSocket + AWS ECS | Observability + cloud |
+
+**Tech:** Java 17 · Spring Boot 4 · TimescaleDB · React · Recharts · Docker · Kubernetes · GitHub Actions · Grafana · WebSocket (STOMP) · Anthropic Claude API · AWS ECS Fargate
 
 ---
 
