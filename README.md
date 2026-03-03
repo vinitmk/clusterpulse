@@ -241,9 +241,12 @@ clusterpulse/
 │   └── workflows/
 │       └── ci.yml
 ├── docker-compose.yml
+├── .env.example
+├── CONTRIBUTING.md
+├── DEPLOYMENT.md
 └── README.md
 ```
 
 ---
 
-*Coming next — Iteration 5 Phase D: Cloud deployment.*
+*Iteration 5 Phase D: AWS ECS cloud deployment — in progress, see [DEPLOYMENT.md](DEPLOYMENT.md).*
