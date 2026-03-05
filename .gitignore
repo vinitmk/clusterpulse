@@ -32,3 +32,4 @@ frontend/.env.production.local
 !**/src/test/**/target/
 .env
 k8s/secret.yaml
+ecs/task-definition.json
